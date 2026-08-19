@@ -1,0 +1,87 @@
+[project]
+name = "github-hook-agent"
+version = "0.0.0"
+description = "Agent actions triggered by GitHub webhook notifications"
+requires-python = ">=3.14"
+license = "MIT"
+authors = [{ name = "Dave Shawley", email = "daveshawley@gmail.com" }]
+dependencies = [
+  "fastapi>=0.141.1",
+  "httptools>=0.8.0",
+  "uvicorn>=0.52.4",
+  "uvloop>=0.22.1",
+]
+
+[dependency-groups]
+dev = [
+  "pre-commit>=4.6.2",
+  "pyrefly>=1.2.0",
+  "python-dotenv>=1.2.3",
+  "ruff>=0.16.3",
+  "tombi>=1.4.1",
+  "ty>=0.0.73",
+  "watchfiles>=1.2.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pyrefly]
+search-path = ["src", "."]
+min-severity = "warn"
+python-version = "3.14"
+
+[tool.ruff]
+line-length = 79
+target-version = "py314"
+
+[tool.ruff.lint]
+select = [
+  "A",
+  "ANN",
+  "ARG",
+  "ASYNC",
+  "B",
+  "BLE",
+  "C4",
+  "C90",
+  "DTZ",
+  "E",
+  "ERA",
+  "F",
+  "FBT",
+  "FLY",
+  "FURB",
+  "G",
+  "I",
+  "ISC",
+  "LOG",
+  "N",
+  "PIE",
+  "PL",
+  "PTH",
+  "RET",
+  "RSE",
+  "S",
+  "SIM",
+  "SLF",
+  "T10",
+  "T20",
+  "TC",
+  "TRY",
+  "UP",
+  "W"
+]
+ignore = [
+  "RSE102",  # I like to raise exception instances not classes
+  "TC003",  # This doesn't work with pydantic
+  "TRY003",  # Allow messages in exception initializers
+]
+pydocstyle = { convention = "google" }
+isort = { split-on-trailing-comma = false }
+
+# since I occasiontally work inside of a sandbox
+[[tool.uv.index]]
+url = "https://pypi.org/simple"
+default = true
