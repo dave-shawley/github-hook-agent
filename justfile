@@ -3,6 +3,10 @@ export UV_FROZEN := "1"
 @_help:
     just --list
 
+# Lint files, defaulting to all
+check *FILES:
+    uv run ruff check {{ FILES }}
+
 # Format all files
 format:
     uv run pre-commit run --all-files ruff-format
