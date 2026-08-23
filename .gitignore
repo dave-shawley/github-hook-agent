@@ -1,4 +1,6 @@
 .*
+!/.githooks/
+!/.githooks/**
 !/.gitignore
 !/.dockerignore
 !/.pre-commit-config.yaml

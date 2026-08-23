@@ -1,7 +1,14 @@
 export UV_FROZEN := "1"
 
+mod hooks 'just/hooks.just'
+
 @_help:
-    just --list
+    just --list --list-submodules
+
+# Setup a new repo
+setup:
+    @just hooks::install-hooks
+    uv sync --all-extras --all-groups
 
 # Lint files, defaulting to all
 check *FILES:
