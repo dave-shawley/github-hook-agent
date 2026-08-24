@@ -1,0 +1,43 @@
+FROM python:3.14-slim AS builder
+
+ENV \
+	UV_COMPILE_BYTECODE=1 \
+	UV_LINK_MODE=copy \
+	UV_NATIVE_TLS=1 \
+	UV_NO_MANAGED_PYTHON=1 \
+	UV_PROJECT_ENVIRONMENT=/app \
+    UV_FROZEN=1 \
+    UV_PYTHON_DOWNLOADS=never \
+	VIRTUAL_ENV=/app
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
+COPY /pyproject.toml /uv.lock /source/
+RUN uv sync --directory /source --no-dev --no-default-groups --no-editable
+
+#
+# `package-builder` stage extends the `builder` stage by installing a specific application
+#
+FROM builder AS package-builder
+ARG APPLICATION
+COPY apps/$APPLICATION/ /source/apps/$APPLICATION/
+RUN uv sync --directory /source --package $APPLICATION --no-editable --frozen --no-dev --inexact
+
+#
+# `webapp` stage copies the installed environment discarding `/source` and other build-time artifacts
+#
+FROM python:3.14-slim AS webapp
+EXPOSE 8000
+ENV \
+    PATH="/app/bin:$PATH" \
+    UVICORN_HOST=0.0.0.0 \
+    UVICORN_LOG_CONFIG="/app/log-config.json" \
+    UVICORN_NO_SERVER_HEADER="true" \
+    UVICORN_PROXY_HEADERS="true" \
+    UVICORN_WORKERS="1" \
+    UVICORN_WS="none" \
+    VIRTUAL_ENV="/app"
+
+COPY --from=package-builder /app /app
+COPY /packaging/docker/log-config.json /app/log-config.json
+VOLUME /config
+CMD ["/app/bin/uvicorn", "--factory", "github_webhook.entrypoint:create_app"]

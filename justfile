@@ -8,7 +8,7 @@ mod hooks 'just/hooks.just'
 # Setup a new repo
 setup:
     @just hooks::install-hooks
-    uv sync --all-extras --all-groups
+    uv sync --all-extras --all-groups --all-packages
 
 # Lint files, defaulting to all
 check *FILES:
@@ -19,6 +19,6 @@ format *FILES:
     dprint fmt --allow-no-files {{ FILES }}
     just --fmt --unstable
 
-# Build docker image
-docker-build name="github-hook-agent:local":
-    docker build -t {{ name }} .
+# Build docker images
+docker-build:
+    docker build -t github-webhook:local --build-arg APPLICATION=github-webhook -f packaging/docker/Dockerfile.python .

@@ -5,14 +5,7 @@ description = "Agent actions triggered by GitHub webhook notifications"
 requires-python = ">=3.14"
 license = "MIT"
 authors = [{ name = "Dave Shawley", email = "daveshawley@gmail.com" }]
-dependencies = [
-  "fastapi>=0.141.1",
-  "httptools>=0.8.0",
-  "pydantic~=2.13",
-  "pydantic-settings>=2.15.0",
-  "uvicorn>=0.52.4",
-  "uvloop>=0.22.1",
-]
+dependencies = []
 
 [dependency-groups]
 dev = [
@@ -26,20 +19,18 @@ dev = [
 ]
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["uv_build~=0.11.29"]
+build-backend = "uv_build"
 
 [tool.pyrefly]
-search-path = ["src", "."]
+infer-return-types = "never"
 min-severity = "warn"
 python-version = "3.14"
+use-ignore-files = true
 
 [tool.ruff]
 line-length = 79
 target-version = "py314"
-
-[tool.ruff.format]
-quote-style = "single"
 
 [tool.ruff.lint]
 select = [
@@ -89,7 +80,16 @@ flake8-quotes = { inline-quotes = "single" }
 pydocstyle = { convention = "google" }
 isort = { split-on-trailing-comma = false }
 
+[tool.uv]
+package = false
+required-version = " >=0.10.0"
+
 # since I occasiontally work inside of a sandbox
 [[tool.uv.index]]
 url = "https://pypi.org/simple"
 default = true
+
+[tool.uv.workspace]
+members = [
+  "apps/github-webhook",
+]

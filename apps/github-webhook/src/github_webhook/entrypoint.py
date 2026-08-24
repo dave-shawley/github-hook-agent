@@ -1,6 +1,6 @@
 import fastapi
 
-from github_hook_agent import webhook
+from github_webhook import webhook
 
 
 def create_app() -> fastapi.FastAPI:

@@ -5,7 +5,7 @@ import fastapi
 import pydantic
 import pydantic_settings
 
-from github_hook_agent import utilities
+from github_webhook import utilities
 
 router = fastapi.APIRouter(prefix='/notifications')
 
