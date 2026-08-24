@@ -3,7 +3,7 @@ name = "github-webhook"
 version = "0.0.0"
 description = "Receives GitHub webhook notifications"
 requires-python = ">=3.14"
-license = "MIT"
+license = "BSD-3-Clause"
 authors = [{ name = "Dave Shawley", email = "daveshawley@gmail.com" }]
 dependencies = [
   "fastapi>=0.141.1",

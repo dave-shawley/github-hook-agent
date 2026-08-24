@@ -3,7 +3,7 @@ name = "github-hook-agent"
 version = "0.0.0"
 description = "Agent actions triggered by GitHub webhook notifications"
 requires-python = ">=3.14"
-license = "MIT"
+license = "BSD-3-Clause"
 authors = [{ name = "Dave Shawley", email = "daveshawley@gmail.com" }]
 dependencies = []
 
