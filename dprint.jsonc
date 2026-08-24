@@ -1,0 +1,27 @@
+{
+  "excludes": ["**/package-lock.json", "**/uv.lock"],
+  "exec": {
+    "cwd": "${configDir}",
+    "commands": [
+      // tombi currently uses tokio for async I/O which is
+      // incompatible with WASM so we need to exec it.
+      {
+        "command": "uv run tombi format --quiet --stdin-filename {{file_path}} -",
+        "exts": ["toml"],
+      },
+    ],
+  },
+  "markdown": {
+    "lineWidth": 120,
+    "textWrap": "maintain", // consider using "always"
+  },
+  "ruff": {
+    "lineLength": 79,
+    "quoteStyle": "single",
+  },
+  "plugins": [
+    "https://plugins.dprint.dev/ruff-0.8.1.wasm",
+    "https://plugins.dprint.dev/markdown-0.22.1.wasm",
+    "https://plugins.dprint.dev/exec-0.7.3.json@a7898d5f1897e77bff474cec3d948c3ec3a7f455e32de2cc60c8adb9a5dd24aa",
+  ],
+}

@@ -77,7 +77,7 @@ select = [
   "TC",
   "TRY",
   "UP",
-  "W"
+  "W",
 ]
 ignore = [
   "RSE102",  # I like to raise exception instances not classes

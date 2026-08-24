@@ -14,10 +14,9 @@ setup:
 check *FILES:
     uv run ruff check {{ FILES }}
 
-# Format all files
-format:
-    uv run pre-commit run --all-files ruff-format
-    uv run pre-commit run --all-files tombi-format
+# Format files (defaults to all files)
+format *FILES:
+    dprint fmt --allow-no-files {{ FILES }}
     just --fmt --unstable
 
 # Build docker image

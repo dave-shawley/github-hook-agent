@@ -35,28 +35,17 @@ install-hooks:
       echo "Using existing core.hooksPath=$hooks_path"; \
     fi
 
-[doc("Run staged formatting and then check-only pre-commit hooks")]
+[doc("Run staged dprint formatting and then check-only pre-commit hooks")]
 [no-cd]
 pre-commit:
     @format_staged() { \
       local path="$1"; \
-      local kind="$2"; \
       local tmpdir mode blob diff_status; \
       tmpdir="$(mktemp -d)"; \
       git show ":$path" > "$tmpdir/original"; \
-      case "$kind" in \
-        python) \
-          UV_CACHE_DIR=/private/tmp/uv-cache uv run --no-sync ruff format --stdin-filename "$path" - < "$tmpdir/original" > "$tmpdir/formatted"; \
-          ;; \
-        toml) \
-          UV_CACHE_DIR=/private/tmp/uv-cache uv run --no-sync tombi format --stdin-filename "$path" - < "$tmpdir/original" > "$tmpdir/formatted"; \
-          ;; \
-        *) \
-          echo "unsupported formatter kind: $kind" >&2; \
-          rm -rf "$tmpdir"; \
-          return 1; \
-          ;; \
-      esac; \
+      UV_CACHE_DIR=/private/tmp/uv-cache \
+      DPRINT_CACHE_DIR=/private/tmp/dprint-cache \
+      dprint fmt --stdin "$path" < "$tmpdir/original" > "$tmpdir/formatted"; \
       if cmp -s "$tmpdir/original" "$tmpdir/formatted"; then \
         rm -rf "$tmpdir"; \
         return 0; \
@@ -89,16 +78,7 @@ pre-commit:
     staged_files=(); \
     while IFS= read -r -d '' path; do \
       staged_files+=("$path"); \
-      case "$path" in \
-        *.py) \
-          format_staged "$path" python; \
-          ;; \
-        *.toml) \
-          if [ "$path" != "uv.lock" ]; then \
-            format_staged "$path" toml; \
-          fi; \
-          ;; \
-      esac; \
+      format_staged "$path"; \
     done < <(git diff --cached --name-only -z --diff-filter=ACMR); \
     if ((${#staged_files[@]} > 0)); then \
       UV_CACHE_DIR=/private/tmp/uv-cache uv run --no-sync pre-commit run --files "${staged_files[@]}"; \
