@@ -9,18 +9,29 @@ dependencies = []
 
 [dependency-groups]
 dev = [
-  "pre-commit>=4.6.2",
-  "pyrefly>=1.2.0",
-  "python-dotenv>=1.2.3",
+  "coverage~=7.15",
+  "httpx2~=2.12",
+  "pre-commit~=4.6",
+  "pyrefly~=1.2",
+  "pytest~=9.1",
+  "python-dotenv~=1.2",
   "ruff>=0.16.3",
-  "tombi>=1.4.1",
+  "tombi~=1.4",
   "ty>=0.0.73",
-  "watchfiles>=1.2.0",
+  "watchfiles~=1.2",
 ]
 
 [build-system]
 requires = ["uv_build~=0.11.29"]
 build-backend = "uv_build"
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.coverage.run]
+branch = true
+# `source` accepts module names in addition to the documented paths
+source = ["github_webhook", "fastapi_runner", "fastapi_utilities"]
 
 [tool.pyrefly]
 infer-return-types = "never"
@@ -31,6 +42,9 @@ use-ignore-files = true
 [tool.ruff]
 line-length = 79
 target-version = "py314"
+
+[tool.ruff.format]
+quote-style = "single"
 
 [tool.ruff.lint]
 select = [
@@ -80,9 +94,38 @@ flake8-quotes = { inline-quotes = "single" }
 pydocstyle = { convention = "google" }
 isort = { split-on-trailing-comma = false }
 
+[tool.ruff.lint.flake8-import-conventions]
+aliases = { typing = "t" }
+banned-aliases = { "collections.abc" = ["abc"] }
+banned-from = ["typing"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**/*.py" = ["SLF001"]
+
 [tool.uv]
+# constraint-dependencies control the dependency versions
+# across ALL members of the workspace. This is what lets
+# us refer to dependencies by name in member projects and
+# avoid having to specify matching versions everywhere.
+constraint-dependencies = [
+  "anyio~=4.14",
+  "fastapi~=0.139.1",
+  "pydantic~=2.13",
+  "pydantic-settings~=2.14",
+  "starlette~=1.3",
+  "typer~=0.26",
+  "uvicorn[standard]~=0.49",
+  "uvloop>=0.22.1",
+]
 package = false
 required-version = " >=0.10.0"
+
+# sources is inherited by member projects so they will
+# ALWAYS use the workspace sources for certain dependencies.
+# This is used for libraries.
+[tool.uv.sources]
+fastapi-runner = { workspace = true }
+fastapi-utilities = { workspace = true }
 
 # since I occasiontally work inside of a sandbox
 [[tool.uv.index]]
@@ -92,4 +135,6 @@ default = true
 [tool.uv.workspace]
 members = [
   "apps/github-webhook",
+  "libraries/fastapi-runner",
+  "libraries/fastapi-utilities",
 ]

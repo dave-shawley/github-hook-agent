@@ -1,0 +1,9 @@
+[project]
+name = "fastapi-runner"
+version = "0.0.0"
+
+depemndencies = ["fastapi", "fastapi-utilities", "pydantic", "pydantic-settings"]
+
+[build-system]
+requires = ["uv_build~=0.11.29"]
+build-backend = "uv_build"

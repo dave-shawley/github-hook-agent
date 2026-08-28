@@ -12,7 +12,9 @@ ENV \
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 COPY /pyproject.toml /uv.lock /source/
-RUN uv sync --directory /source --no-dev --no-default-groups --no-editable
+COPY /libraries/fastapi-runner /source/libraries/fastapi-runner
+COPY /libraries/fastapi-utilities /source/libraries/fastapi-utilities
+RUN uv sync --directory /source --no-dev --no-default-groups --no-editable --frozen
 
 #
 # `package-builder` stage extends the `builder` stage by installing a specific application
@@ -40,4 +42,4 @@ ENV \
 COPY --from=package-builder /app /app
 COPY /packaging/docker/log-config.json /app/log-config.json
 VOLUME /config
-CMD ["/app/bin/uvicorn", "--factory", "github_webhook.entrypoint:create_app"]
+CMD ["/app/bin/uvicorn", "--factory", "fastapi_runner.entrypoint:app_factory"]

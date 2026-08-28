@@ -2,10 +2,10 @@ import hmac
 import typing as t
 
 import fastapi
+import fastapi_utilities
 import pydantic
 import pydantic_settings
-
-from github_webhook import utilities
+from fastapi_utilities import settings
 
 router = fastapi.APIRouter(prefix='/notifications')
 
@@ -23,7 +23,7 @@ async def _validate_signature(
         raise fastapi.HTTPException(400)
     expected = header[7:].lower()
 
-    cfg = utilities.from_environment(WebhookSettings)
+    cfg = settings.from_environment(WebhookSettings)
     digest = hmac.HMAC(
         digestmod='sha256', key=cfg.webhook_secret.get_secret_value().encode()
     )
@@ -48,6 +48,6 @@ async def process_notification(
     hook_id: t.Annotated[str, fastapi.Header(alias='x-github-hook-id')],
     _sig: WebhookSignature,
 ) -> fastapi.Response:
-    logger = utilities.get_logger(process_notification)
+    logger = fastapi_utilities.get_logger(process_notification)
     logger.info('Processing %s@%s {hook_id:%s)', event, hook, hook_id)
     return fastapi.Response(status_code=204)
