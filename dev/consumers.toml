@@ -1,0 +1,29 @@
+[Application.Connections.Dev]
+host = "naughty_hamilton"
+user = "agent-consumer"
+pass = "lily0torque-mendez!since"
+ssl = false
+
+[Application.Consumers.agent-consumer]
+consumer = "agent_consumer.consumer.AgentConsumer"
+connections = ["Dev"]
+qty = 1
+queue = "agent-consumer"
+
+[Logging]
+version = 1
+
+[Logging.formatters.console]
+format = "%(asctime)s %(levelname)1.1s %(name)s: %(message)s"
+
+[Logging.handlers.console]
+class = "logging.StreamHandler"
+formatter = "console"
+
+[Logging.loggers.pika]
+level = "DEBUG"
+handlers = ["console"]
+
+[Logging.loggers.rejected]
+level = "DEBUG"
+handlers = ["console"]

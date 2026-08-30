@@ -22,17 +22,21 @@ RUN uv sync --directory /source --no-dev --no-default-groups --no-editable --fro
 FROM builder AS package-builder
 ARG APPLICATION
 COPY apps/$APPLICATION/ /source/apps/$APPLICATION/
-RUN uv sync --directory /source --package $APPLICATION --no-editable --frozen --no-dev --inexact
+RUN apt update \
+ && apt install -y --no-install-recommends git \
+ && uv sync --directory /source --package $APPLICATION --no-editable --frozen --no-dev --inexact
 
 #
 # `webapp` stage copies the installed environment discarding `/source` and other build-time artifacts
+# The application is run using `uvicorn` with the `fastapi_runner` entrypoint. The installed application
+# needs to include an entrypoint for the runner.
 #
 FROM python:3.14-slim AS webapp
 EXPOSE 8000
 ENV \
     PATH="/app/bin:$PATH" \
     UVICORN_HOST=0.0.0.0 \
-    UVICORN_LOG_CONFIG="/app/log-config.json" \
+    UVICORN_LOG_CONFIG="/config/log-config.json" \
     UVICORN_NO_SERVER_HEADER="true" \
     UVICORN_PROXY_HEADERS="true" \
     UVICORN_WORKERS="1" \
@@ -40,6 +44,20 @@ ENV \
     VIRTUAL_ENV="/app"
 
 COPY --from=package-builder /app /app
-COPY /packaging/docker/log-config.json /app/log-config.json
+COPY /packaging/docker/log-config.json /config/log-config.json
 VOLUME /config
 CMD ["/app/bin/uvicorn", "--factory", "fastapi_runner.entrypoint:app_factory"]
+
+#
+# `consumer` stage copies the installed environment discarding `/source` and other build-time artifacts
+# The application is run using `rejected` and a mounted configuration file.
+#
+FROM python:3.14-slim AS consumer
+EXPOSE 8000
+ENV \
+    CONSUMER="undefined" \
+    PATH="/app/bin:$PATH"
+
+COPY --from=package-builder /app /app
+VOLUME /config
+CMD ["/app/bin/rejected", "--config", "/config/consumers.toml", "--only", "$CONSUMER"]

@@ -31,7 +31,7 @@ show_missing = true
 [tool.coverage.run]
 branch = true
 # `source` accepts module names in addition to the documented paths
-source = ["github_webhook", "fastapi_runner", "fastapi_utilities"]
+source = ["agent_consumer", "github_webhook", "fastapi_runner", "fastapi_utilities"]
 
 [tool.pyrefly]
 infer-return-types = "never"
@@ -124,6 +124,7 @@ required-version = " >=0.10.0"
 # ALWAYS use the workspace sources for certain dependencies.
 # This is used for libraries.
 [tool.uv.sources]
+agent-consumer = { workspace = true }
 fastapi-runner = { workspace = true }
 fastapi-utilities = { workspace = true }
 
@@ -134,6 +135,7 @@ default = true
 
 [tool.uv.workspace]
 members = [
+  "apps/agent-consumer",
   "apps/github-webhook",
   "libraries/fastapi-runner",
   "libraries/fastapi-utilities",

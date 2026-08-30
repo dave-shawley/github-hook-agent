@@ -1,0 +1,17 @@
+[project]
+name = "agent-consumer"
+version = "0.0.0"
+description = "AMQP consumer that runs an agent loop"
+requires-python = ">=3.14"
+license = "BSD-3-Clause"
+authors = [{ name = "Dave Shawley", email = "daveshawley@gmail.com" }]
+dependencies = [
+  "rejected",
+]
+
+[build-system]
+requires = ["uv_build~=0.11.29"]
+build-backend = "uv_build"
+
+[tool.uv.sources]
+rejected = { git = "https://github.com/pianoman19372/rejected.git", branch = "fix/asyncio-connection-event-loop" }

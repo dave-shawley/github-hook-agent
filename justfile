@@ -29,4 +29,5 @@ test *ARGS:
 
 # Build docker images
 docker-build:
-    docker build -t github-webhook:local --build-arg APPLICATION=github-webhook -f packaging/docker/Dockerfile.python .
+    docker build -t github-webhook:local --build-arg APPLICATION=github-webhook --target=webapp -f packaging/docker/Dockerfile.python .
+    docker build -t agent-consumer:local --build-arg APPLICATION=agent-consumer --target=consumer -f packaging/docker/Dockerfile.python .
