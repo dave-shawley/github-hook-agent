@@ -1,0 +1,45 @@
+services:
+  rabbitmq:
+    image: rabbitmq:4.3-management
+    ports:
+      - 5672
+      - 15672
+    volumes:
+      - ./rabbitmq/:/config/
+    environment:
+      RABBITMQ_CONFIG_FILE: /config/rabbitmq.conf
+
+  github-webhook:
+    build:
+      context: ..
+      dockerfile: packaging/docker/Dockerfile.python
+      target: webapp
+      args:
+        APPLICATION: github-webhook
+    image: github-webhook:local
+    ports:
+      - 8000
+    secrets:
+      - rabbitmq-github-webhook-password
+
+  workflow_runs:
+    build:
+      context: ..
+      dockerfile: packaging/docker/Dockerfile.python
+      target: consumer
+      args:
+        APPLICATION: agent-consumer
+    image: agent-consumer:local
+    volumes:
+      - ./consumers.toml:/config/consumers.toml
+    command: rejected -c /config/consumers.toml --only workflow-runs
+    secrets:
+      - rabbitmq-agent-consumer-password
+
+secrets:
+  rabbitmq-agent-consumer-password:
+    file: ./secrets/rabbitmq-agent-consumer-password.txt
+  rabbitmq-admin-password:
+    file: ./secrets/rabbitmq-admin-password.txt
+  rabbitmq-github-webhook-password:
+    file: ./secrets/rabbitmq-github-webhook-password.txt

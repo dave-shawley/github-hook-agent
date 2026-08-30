@@ -1,14 +1,14 @@
 [Application.Connections.Dev]
-host = "naughty_hamilton"
+host = "rabbitmq"
 user = "agent-consumer"
 pass = "lily0torque-mendez!since"
 ssl = false
 
-[Application.Consumers.agent-consumer]
+[Application.Consumers.workflow-runs]
 consumer = "agent_consumer.consumer.AgentConsumer"
 connections = ["Dev"]
 qty = 1
-queue = "agent-consumer"
+queue = "workflow_runs"
 
 [Logging]
 version = 1
