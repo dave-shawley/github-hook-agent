@@ -1,0 +1,15 @@
+[project]
+name = "rabbitmq-publisher"
+version = "0.0.0"
+description = "A small asynchronous RabbitMQ publisher"
+requires-python = ">=3.14"
+license = "BSD-3-Clause"
+authors = [{ name = "Dave Shawley", email = "daveshawley@gmail.com" }]
+dependencies = [
+  "pamqp~=3.3",
+  "pydantic>=2.13.4",
+]
+
+[build-system]
+requires = ["uv_build~=0.11.29"]
+build-backend = "uv_build"

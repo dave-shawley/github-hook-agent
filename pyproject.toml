@@ -31,13 +31,22 @@ show_missing = true
 [tool.coverage.run]
 branch = true
 # `source` accepts module names in addition to the documented paths
-source = ["agent_consumer", "github_webhook", "fastapi_runner", "fastapi_utilities"]
+source = [
+  "agent_consumer",
+  "github_webhook",
+  "fastapi_runner",
+  "fastapi_utilities",
+  "rabbitmq_publisher",
+]
 
 [tool.pyrefly]
 infer-return-types = "never"
 min-severity = "warn"
 python-version = "3.14"
 use-ignore-files = true
+
+[tool.pytest.ini_options]
+markers = ["integration: requires the development RabbitMQ service"]
 
 [tool.ruff]
 line-length = 79
@@ -127,6 +136,7 @@ required-version = " >=0.10.0"
 agent-consumer = { workspace = true }
 fastapi-runner = { workspace = true }
 fastapi-utilities = { workspace = true }
+rabbitmq-publisher = { workspace = true }
 
 # since I occasiontally work inside of a sandbox
 [[tool.uv.index]]
@@ -139,4 +149,5 @@ members = [
   "apps/github-webhook",
   "libraries/fastapi-runner",
   "libraries/fastapi-utilities",
+  "libraries/rabbitmq-publisher",
 ]
