@@ -51,6 +51,7 @@ class FakeEntryPoints:
 
 class FakeDistribution:
     def __init__(self, entry_points: FakeEntryPoints) -> None:
+        self.name = 'github-runner'
         self.entry_points = entry_points
 
 

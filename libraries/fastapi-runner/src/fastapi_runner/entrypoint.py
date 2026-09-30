@@ -1,3 +1,4 @@
+import contextlib
 import os
 import typing as t
 from collections import abc
@@ -36,8 +37,6 @@ class ApplicationConfigurationError(RuntimeError):
 
 
 def app_factory() -> fastapi.FastAPI:
-    span = lifespan.Lifespan()
-
     try:
         application = os.environ['APPLICATION']
     except KeyError:
@@ -53,22 +52,22 @@ def app_factory() -> fastapi.FastAPI:
             'Python distribution'
         ) from None
 
-    entry_points = distribution.entry_points.select(group='fastapi_runner')
-    num_eps = len(entry_points.select(name='configure'))
-    if num_eps != 1:
-        raise ValueError(
-            f'Expected exactly one configure entrypoint in fastapi_runner'
-            f' group, but found {num_eps} in {application!r}'
-        )
+    configure, lifespan_generator = _load_hooks(distribution)
 
-    try:
-        gen_lifespans = t.cast(
-            'LifespanGenerator', entry_points['lifespans'].load()
-        )
-    except KeyError:
-        pass
-    else:
-        for hook in gen_lifespans():
+    return create_app(
+        configure=configure,
+        lifespan_generator=lifespan_generator,
+    )
+
+
+def create_app(
+    *,
+    configure: ConfigHook,
+    lifespan_generator: LifespanGenerator | None,
+) -> fastapi.FastAPI:
+    span = lifespan.Lifespan()
+    if lifespan_generator is not None:
+        for hook in lifespan_generator():
             span.add_lifespan(hook)
 
     cors_settings = CORSSettings()
@@ -85,13 +84,34 @@ def app_factory() -> fastapi.FastAPI:
         max_age=cors_settings.max_age,
     )
 
+    # Let the application configure its routes
+    configure(app)
+
     # The AccessLogMiddleware should ALWAYS be added last
     app.add_middleware(
         middleware.AccessLogMiddleware,
         ignored_paths=('/docs', '/openapi.json', '/redoc'),
     )
 
-    configure = t.cast('ConfigHook', entry_points['configure'].load())
-    configure(app)
-
     return app
+
+
+def _load_hooks(
+    distribution: metadata.Distribution,
+) -> tuple[ConfigHook, LifespanGenerator | None]:
+    entry_points = distribution.entry_points.select(group='fastapi_runner')
+    num_eps = len(entry_points.select(name='configure'))
+    if num_eps != 1:
+        raise ValueError(
+            f'Expected exactly one configure entrypoint in fastapi_runner'
+            f' group, but found {num_eps} in {distribution.name!r}'
+        )
+
+    configure = t.cast('ConfigHook', entry_points['configure'].load())
+    lifespan_generator: LifespanGenerator | None = None
+    with contextlib.suppress(KeyError):
+        lifespan_generator = t.cast(
+            'LifespanGenerator', entry_points['lifespans'].load()
+        )
+
+    return configure, lifespan_generator
