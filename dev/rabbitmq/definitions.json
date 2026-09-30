@@ -1,4 +1,25 @@
 {
+  "bindings": [
+    {
+      "arguments": {},
+      "destination": "workflow_runs",
+      "destination_type": "queue",
+      "routing_key": "workflow_run",
+      "source": "webhooks",
+      "vhost": "/"
+    }
+  ],
+  "exchanges": [
+    {
+      "arguments": {},
+      "auto_delete": false,
+      "durable": true,
+      "name": "webhooks",
+      "type": "direct",
+      "vhost": "/"
+    }
+  ],
+  "parameters": [],
   "permissions": [
     {
       "configure": ".*",
@@ -13,16 +34,13 @@
       "user": "agent-consumer",
       "vhost": "/",
       "write": ""
-    }
-  ],
-  "bindings": [
+    },
     {
-      "arguments": {},
-      "destination": "workflow_runs",
-      "destination_type": "queue",
-      "routing_key": "workflow_run",
-      "source": "webhooks",
-      "vhost": "/"
+      "configure": "",
+      "read": "",
+      "user": "github-webhook",
+      "vhost": "/",
+      "write": "^webhooks$"
     }
   ],
   "queues": [
@@ -37,48 +55,15 @@
       "vhost": "/"
     }
   ],
-  "parameters": [],
-  "policies": [],
-  "rabbitmq_version": "4.3.5",
-  "rabbit_version": "4.3.5",
-  "exchanges": [
-    {
-      "arguments": {},
-      "auto_delete": false,
-      "durable": true,
-      "name": "amq.rabbitmq.log",
-      "type": "topic",
-      "vhost": "/"
-    },
-    {
-      "arguments": {},
-      "auto_delete": false,
-      "durable": true,
-      "name": "webhooks",
-      "type": "direct",
-      "vhost": "/"
-    }
-  ],
-  "vhosts": [
-    {
-      "limits": {},
-      "metadata": {
-        "description": "Default virtual host",
-        "tags": [],
-        "default_queue_type": "classic"
-      },
-      "name": "/"
-    }
-  ],
+  "rabbitmq_definition_format": "cluster",
+  "topic_permissions": [],
   "users": [
     {
       "hashing_algorithm": "rabbit_password_hashing_sha256",
       "limits": {},
       "name": "admin",
       "password_hash": "g8uMaxUV0BQzNItTvG6a/0WBi5TutuyegGqPMzLm8TbXH6wx",
-      "tags": [
-        "administrator"
-      ]
+      "tags": ["administrator"]
     },
     {
       "hashing_algorithm": "rabbit_password_hashing_sha256",
@@ -86,13 +71,24 @@
       "name": "agent-consumer",
       "password_hash": "2shozVwkxsMPKHDeG5GBDP3pBe+EIPuiOCd5yuY2MoHRD5h7",
       "tags": []
-    }
-  ],
-  "global_parameters": [
+    },
     {
-      "name": "cluster_tags",
-      "value": []
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "limits": {},
+      "name": "github-webhook",
+      "password_hash": "W+Hh7GTt2CsaZBPh7DWBgz3aJ1RZZOnmLUd0ePLGL3jqPRN6",
+      "tags": []
     }
   ],
-  "topic_permissions": []
+  "vhosts": [
+    {
+      "limits": {},
+      "metadata": {
+        "default_queue_type": "classic",
+        "description": "Default virtual host",
+        "tags": []
+      },
+      "name": "/"
+    }
+  ]
 }
