@@ -15,6 +15,7 @@ setup:
 [doc("Lint files, defaulting to all")]
 [group("Development Tasks")]
 analyze *FILES:
+    #!/bin/sh
     uv run ruff check {{ FILES }}
     uv run pyrefly check .  # always analyse complete context
     uv run ty check .  # always analyse complete context
