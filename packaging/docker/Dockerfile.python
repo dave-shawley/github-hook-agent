@@ -12,8 +12,7 @@ ENV \
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 COPY /pyproject.toml /uv.lock /source/
-COPY /libraries/fastapi-runner /source/libraries/fastapi-runner
-COPY /libraries/fastapi-utilities /source/libraries/fastapi-utilities
+COPY /libraries /source/libraries/
 RUN uv sync --directory /source --no-dev --no-default-groups --no-editable --frozen
 
 #
@@ -22,8 +21,8 @@ RUN uv sync --directory /source --no-dev --no-default-groups --no-editable --fro
 FROM builder AS package-builder
 ARG APPLICATION
 COPY apps/$APPLICATION/ /source/apps/$APPLICATION/
-RUN apt update \
- && apt install -y --no-install-recommends git \
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends git \
  && uv sync --directory /source --package $APPLICATION --no-editable --frozen --no-dev --inexact
 
 #
