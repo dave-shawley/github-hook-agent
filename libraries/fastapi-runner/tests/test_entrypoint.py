@@ -27,7 +27,16 @@ class FakeEntryPoints:
     def __init__(self, **entry_points: FakeEntryPoint) -> None:
         self._entry_points = entry_points
 
-    def select(self, *, name: str) -> tuple[FakeEntryPoint, ...]:
+    def select(
+        self,
+        *,
+        group: str | None = None,
+        name: str | None = None,
+    ) -> t.Self | tuple[FakeEntryPoint, ...]:
+        if group is not None:
+            return self
+        if name is None:
+            raise AssertionError('Expected an entry point name')
         try:
             return (self._entry_points[name],)
         except KeyError:
@@ -36,26 +45,69 @@ class FakeEntryPoints:
     def __getitem__(self, name: str) -> FakeEntryPoint:
         return self._entry_points[name]
 
+    def __len__(self) -> int:
+        return len(self._entry_points)
+
+
+class FakeDistribution:
+    def __init__(self, entry_points: FakeEntryPoints) -> None:
+        self.entry_points = entry_points
+
 
 class EntryPointTests(unittest.IsolatedAsyncioTestCase):
+    def test_app_factory_requires_application_environment_variable(
+        self,
+    ) -> None:
+        with (
+            mock.patch.dict('os.environ', {}, clear=True),
+            self.assertRaisesRegex(
+                entrypoint.ApplicationConfigurationError,
+                'APPLICATION environment variable is required',
+            ),
+        ):
+            entrypoint.app_factory()
+
+    def test_app_factory_requires_installed_application_distribution(
+        self,
+    ) -> None:
+        with (
+            mock.patch.dict('os.environ', {'APPLICATION': 'github-runner'}),
+            mock.patch.object(
+                entrypoint.metadata,
+                'distribution',
+                side_effect=entrypoint.metadata.PackageNotFoundError,
+            ),
+            self.assertRaisesRegex(
+                entrypoint.ApplicationConfigurationError,
+                "APPLICATION='github-runner' does not identify an installed "
+                'Python distribution',
+            ),
+        ):
+            entrypoint.app_factory()
+
     def test_app_factory_requires_exactly_one_configure_entry_point(
         self,
     ) -> None:
         entry_points = FakeEntryPoints()
 
         with (
+            mock.patch.dict('os.environ', {'APPLICATION': 'github-runner'}),
             mock.patch.object(
-                entrypoint.metadata, 'entry_points', return_value=entry_points
-            ),
+                entrypoint.metadata,
+                'distribution',
+                return_value=FakeDistribution(entry_points),
+            ) as distribution,
             self.assertRaisesRegex(
                 ValueError,
                 (
                     'Expected exactly one configure entrypoint in '
-                    'fastapi_runner group'
+                    "fastapi_runner group, but found 0 in 'github-runner'"
                 ),
             ),
         ):
             entrypoint.app_factory()
+
+        distribution.assert_called_once_with('github-runner')
 
     def test_app_factory_configures_app_and_adds_middleware(
         self,
@@ -71,8 +123,13 @@ class EntryPointTests(unittest.IsolatedAsyncioTestCase):
 
         entry_points = FakeEntryPoints(configure=FakeEntryPoint(configure))
 
-        with mock.patch.object(
-            entrypoint.metadata, 'entry_points', return_value=entry_points
+        with (
+            mock.patch.object(
+                entrypoint.metadata,
+                'distribution',
+                return_value=FakeDistribution(entry_points),
+            ),
+            mock.patch.dict('os.environ', {'APPLICATION': 'github-runner'}),
         ):
             app = entrypoint.app_factory()
 
@@ -154,8 +211,13 @@ class EntryPointTests(unittest.IsolatedAsyncioTestCase):
             lifespans=FakeEntryPoint(lifespans),
         )
 
-        with mock.patch.object(
-            entrypoint.metadata, 'entry_points', return_value=entry_points
+        with (
+            mock.patch.object(
+                entrypoint.metadata,
+                'distribution',
+                return_value=FakeDistribution(entry_points),
+            ),
+            mock.patch.dict('os.environ', {'APPLICATION': 'github-runner'}),
         ):
             app = entrypoint.app_factory()
 
@@ -179,8 +241,13 @@ class EntryPointTests(unittest.IsolatedAsyncioTestCase):
 
         entry_points = FakeEntryPoints(configure=FakeEntryPoint(configure))
 
-        with mock.patch.object(
-            entrypoint.metadata, 'entry_points', return_value=entry_points
+        with (
+            mock.patch.object(
+                entrypoint.metadata,
+                'distribution',
+                return_value=FakeDistribution(entry_points),
+            ),
+            mock.patch.dict('os.environ', {'APPLICATION': 'github-runner'}),
         ):
             app = entrypoint.app_factory()
 

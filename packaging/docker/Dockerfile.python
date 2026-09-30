@@ -32,8 +32,10 @@ RUN apt update \
 # needs to include an entrypoint for the runner.
 #
 FROM python:3.14-slim AS webapp
+ARG APPLICATION
 EXPOSE 8000
 ENV \
+    APPLICATION="$APPLICATION" \
     PATH="/app/bin:$PATH" \
     UVICORN_HOST=0.0.0.0 \
     UVICORN_LOG_CONFIG="/config/log-config.json" \
@@ -53,11 +55,12 @@ CMD ["/app/bin/uvicorn", "--factory", "fastapi_runner.entrypoint:app_factory"]
 # The application is run using `rejected` and a mounted configuration file.
 #
 FROM python:3.14-slim AS consumer
+ARG APPLICATION
 EXPOSE 8000
 ENV \
-    CONSUMER="undefined" \
+    APPLICATION="$APPLICATION" \
     PATH="/app/bin:$PATH"
 
 COPY --from=package-builder /app /app
 VOLUME /config
-CMD ["/app/bin/rejected", "--config", "/config/consumers.toml", "--only", "$CONSUMER"]
+CMD ["/app/bin/rejected", "--config", "/config/consumers.toml", "--only", "$APPLICATION"]

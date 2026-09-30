@@ -1,3 +1,4 @@
+import os
 import typing as t
 from collections import abc
 from importlib import metadata
@@ -30,13 +31,34 @@ ConfigHook = abc.Callable[[fastapi.FastAPI], None]
 LifespanGenerator = abc.Callable[[], abc.Generator[lifespan.LifespanHook]]
 
 
+class ApplicationConfigurationError(RuntimeError):
+    pass
+
+
 def app_factory() -> fastapi.FastAPI:
     span = lifespan.Lifespan()
 
-    entry_points = metadata.entry_points(group='fastapi_runner')
-    if len(entry_points.select(name='configure')) != 1:
+    try:
+        application = os.environ['APPLICATION']
+    except KeyError:
+        raise ApplicationConfigurationError(
+            'APPLICATION environment variable is required'
+        ) from None
+
+    try:
+        distribution = metadata.distribution(application)
+    except metadata.PackageNotFoundError:
+        raise ApplicationConfigurationError(
+            f'APPLICATION={application!r} does not identify an installed '
+            'Python distribution'
+        ) from None
+
+    entry_points = distribution.entry_points.select(group='fastapi_runner')
+    num_eps = len(entry_points.select(name='configure'))
+    if num_eps != 1:
         raise ValueError(
-            'Expected exactly one configure entrypoint in fastapi_runner group'
+            f'Expected exactly one configure entrypoint in fastapi_runner'
+            f' group, but found {num_eps} in {application!r}'
         )
 
     try:

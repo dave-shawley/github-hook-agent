@@ -191,6 +191,20 @@ wheels = [
 name = "fastapi-runner"
 version = "0.0.0"
 source = { editable = "libraries/fastapi-runner" }
+dependencies = [
+    { name = "fastapi" },
+    { name = "fastapi-utilities" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "fastapi" },
+    { name = "fastapi-utilities", editable = "libraries/fastapi-utilities" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+]
 
 [[package]]
 name = "fastapi-utilities"
