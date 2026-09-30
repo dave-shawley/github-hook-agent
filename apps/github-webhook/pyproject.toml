@@ -11,12 +11,14 @@ dependencies = [
   "fastapi-utilities",
   "pydantic",
   "pydantic-settings",
+  "rabbitmq-publisher",
   "uvicorn[standard]",
   "uvloop",
 ]
 
 [project.entry-points."fastapi_runner"]
 configure = "github_webhook.entrypoint:configure"
+lifespans = "github_webhook.entrypoint:lifespans"
 
 [build-system]
 requires = ["uv_build~=0.11.29"]

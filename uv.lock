@@ -265,6 +265,7 @@ dependencies = [
     { name = "fastapi-utilities" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
+    { name = "rabbitmq-publisher" },
     { name = "uvicorn", extra = ["standard"] },
     { name = "uvloop" },
 ]
@@ -276,6 +277,7 @@ requires-dist = [
     { name = "fastapi-utilities", editable = "libraries/fastapi-utilities" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
+    { name = "rabbitmq-publisher", editable = "libraries/rabbitmq-publisher" },
     { name = "uvicorn", extras = ["standard"] },
     { name = "uvloop" },
 ]
